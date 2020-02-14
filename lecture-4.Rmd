@@ -1,0 +1,101 @@
+---
+title: 'APIs'
+author: "Claire Haldeman"
+date: "2/12/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Application Programming Interfaces (APIs)
+
+Why use an API?
+
+1. Some things are only available through an API (e.g. Twitter)
+2. It's more reproducible, everyone can access the data
+3. It can scale much more easily than point-and-click downloads
+
+Why build an API?
+
+1. It allows you to scale your data
+2. It promotes a standardized approach to data management
+3. It democratizes access to data and methods--provides a way for people with lots of processing power to process for otehrs
+
+Technical Context
+
+* Server: the host
+* Client : us
+* HTTP: ettiquette for how clients and servers communicate
+* Request: specific information about what you want, usually as a URL
+* Response: what the server sends you back 
+* URL: "Uniform resource locator" is a string that specifies a web location, a method for retrieving information, and other things
+
+(Note: Census has great API and documentation)
+
+How to access API
+
+1. Build up a URL from API documentation 
+  * begin query string with a ?
+  * use "GET=" to specify which variables you would like it to return
+  * use "&" to separate different parameters
+  * use "*" to indicate "all" or "placeholder"
+2. Check for errors
+3. Import data from JSON
+  * JSON is JavaScript Object N?
+  * A hierarchical data structure
+  * Usually we only care about a few of the levels of the hierarchy
+
+How to use R to do this for you
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+
+```{r, eval = FALSE}
+#make url, specify outside of the call
+
+api_url <- "http:theurl"
+
+#use GET(api_url, user_agent = ) to make request, declare yourself (make sure you're adhering to terms of service)
+
+#use http_status to check for errors
+
+#download data with content( , as = text)
+
+#read from JSON into matrix
+
+#convert matrix into tbl
+```
+
+Example:
+
+```{r}
+#generic: "https://educationdata.urban.org/api/v1/{topic}/{source}/{endpoint}/{year}/[additional_specifiers _or_disaggregators]/[optional filters]"
+
+api_url <- "https://educationdata.urban.org/api/v1/college-university/ipeds/enrollment-full-time-equivalent/2016/Graduate/?fips=11"
+
+ed_json <- GET(url = api_url,
+               user_agent("Brookings Researcher (chaldeman@brookings.edu)"))
+
+http_status(ed_json)
+
+ed_json <- content(ed_json, type = "text")
+
+ed_json <- fromJSON(ed_json)
+
+ed_data <- ed_json[["results"]]
+
+```
+
+Be aware: 
+* sometimes you need to authenticate yourself
+* sometimes you get data in multiple pages (see notes for help!)
+
+But!! Most big APIs have an R package that helps you access it
